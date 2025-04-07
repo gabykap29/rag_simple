@@ -23,9 +23,9 @@ Instrucciones específicas:
 - Si el ejercicio es correcto según el contexto, indícalo explícitamente.
 - Si el ejercicio contiene errores (que no sean de gramatica), señala los errores y proporciona la corrección adecuada.
 
-Contenido:
-Ejercicio: {ejercicio}
-Respuesta del estudiante: {response_student}
+Contenido (formato markdown):
+Ejercicio: {ejercicio} (salto de línea)
+Respuesta del estudiante: {response_student} (salto de línea)
 Contexto: {contexto}
 
 Respuesta esperada:
@@ -47,7 +47,7 @@ if not os.path.exists(pdfs_directory):
 # y un modelo de LLM para generar respuestas a preguntas.
 embeddings = OllamaEmbeddings(model="nomic-embed-text")
 vector_store = Chroma(persist_directory=db_directory, embedding_function=embeddings)
-model = OllamaLLM(model="phi4-mini", temperature=0.4, max_tokens=2000, Stream = True)
+model = OllamaLLM(model="phi4-mini:3.8b-q4_K_M", temperature=0.4, max_tokens=2000, stream = True)
 
 # Cargar el PDF y dividirlo en fragmentos
 def upload_pdf(file):
@@ -75,14 +75,14 @@ def retrieve_docs(query):
     docs = vector_store.similarity_search(query)
     return docs
 
-def generate_response_stream(exercise, context):
+def generate_response_stream(exercise, context, response_user):
     context = "\n\n".join([doc.page_content for doc in context])
     prompt = ChatPromptTemplate.from_template(custom_template)
     chain = prompt | model
 
     response_stream = chain.stream({
-        "response_student": exercise,
-        "ejercicio": "Explica con tus palabras que es un entorno virtual en python",
+        "response_student": response_user,
+        "ejercicio": exercise,
         "contexto": context
     })
 
@@ -124,16 +124,19 @@ if uploaded_file:
 
     index_docs(chunked_documents)
 
-exercice = st.text_area("Ejercicio a corregir")
+exercice = st.text_area("Ejercicio")
+response_user = st.text_area("Ejercicio a corregir")
     
-if exercice:
+if exercice and response_user:
         st.chat_message("user").write(exercice)
+        st.chat_message("user").write(response_user)
+        st.markdown("---")
         related_documents = retrieve_docs(exercice)
 
         message_placeholder = st.chat_message("assistant").empty()
 
         full_response = ""
 
-        for chunk in generate_response_stream(exercice, related_documents):
+        for chunk in generate_response_stream(exercice, related_documents, response_user):
             full_response += chunk  # cada chunk trae parte del texto
             message_placeholder.markdown(full_response)  # vamos actualizando
