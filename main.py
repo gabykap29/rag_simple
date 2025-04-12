@@ -23,16 +23,15 @@ Instrucciones específicas:
 - Si el ejercicio es correcto según el contexto, indícalo explícitamente.
 - Si el ejercicio contiene errores (que no sean de gramatica), señala los errores y proporciona la corrección adecuada.
 
-Contenido (formato markdown):
-Ejercicio: {ejercicio} (salto de línea)
-Respuesta del estudiante: {response_student} (salto de línea)
+Contenido:
+Preguntas : {ejercicio}
+Respuesta del estudiante: {response_student} 
 Contexto: {contexto}
 
-Respuesta esperada:
+Respuesta esperada (formato markdown):
 - Calificacion: [Correcto/Incorrecto]
 - Corrección: [Breve corrección del ejercicio (solo si es incorrecto)]
 - Comentarios: [Comentarios adicionales sobre el ejercicio, si es necesario]
-- Respuesta correcta: [Respuesta correcta al ejercicio, si es necesario]
 """
 
 
