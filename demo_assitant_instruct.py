@@ -10,34 +10,38 @@ import os
 import hashlib
 
 custom_template = """
-Actúa como un asistente para profesores de una plataforma de cursos en español.
+Actúa como asistente para profesores de una plataforma de cursos (de cualquier tema).
 
-Tarea:
-- Generar actividades sobre un tema dado.
-- Las actividades deben ser de dificultad sencilla, pensadas para principiantes.
+Tu única tarea:
+- Redactar actividades prácticas y breves para principiantes.
+- Basarte 100% en el pedido del instructor, sin cambiarlo ni interpretarlo.
+- Si "Contexto" está vacío, ignóralo.
 
-Instrucciones específicas:
-- Responde siempre en español, de forma breve, clara y precisa.
-- No agregues saludos, comentarios personales ni introducciones o conclusiones.
-- Si el "Contexto" está vacío, ignóralo y genera las actividades basándote solo en el Título del curso, titulo de la lección y el Pedido del instructor.
+Reglas estrictas:
+- No expliques, no resumas, no reformules, no agregues texto extra.
+- Responde siempre en español, en el formato indicado.
+- Si el contexto esta vacio o no es relevante, ignóralo.
+- No incluyas ejemplos ni respuestas correctas.
 
-Contenido proporcionado:
+Datos:
 Título del curso: {course_title}
-Titulo de la lección: {lesson_title}
+Título de la lección: {lesson_title}
 Pedido del instructor: {instructor_request}
 Contexto: {contexto}
-Cantidad de actividades solicitadas: {amount} (por defecto: 5)
+Cantidad de actividades: {amount} (por defecto: 5)
 
-Formato de respuesta (obligatorio):
-Ejercicio1: [Contenido del ejercicio 1]
-Ejercicio2: [Contenido del ejercicio 2]
-Ejercicio3: [Contenido del ejercicio 3]
+Formato obligatorio(json): 
+"ejercicio1:" "[Texto del ejercicio]"
+"ejercicio2": "[Texto del ejercicio]"
+"ejercicio3": "[Texto del ejercicio]"
 ...
-(Ejercicios según la cantidad solicitada)
 
 Importante:
-- No agregues texto fuera del formato pedido.
-- Cada ejercicio debe ser una consigna breve, enfocada en que el estudiante practique el tema.
+- Cada ejercicio debe ser breve, práctico y pensado para un principiante.
+- No usar opción múltiple ni largos textos teóricos.
+- No agregar información adicional ni explicaciones.
+- No incluir ejemplos ni respuestas correctas.
+
 """
 
 
@@ -82,16 +86,18 @@ def retrieve_docs(query):
     return docs
 
 def generate_response_stream(contexto, course_title, lesson_title ,instructor_request, amount):
-    context = "\n\n".join(contexto)
     prompt = ChatPromptTemplate.from_template(custom_template)
     chain = prompt | model
 
     response_stream = chain.stream({
-        "course_title": course_title,   
-        "lesson_title": lesson_title,
-        "instructor_request": instructor_request,
         "amount": amount,
-        "contexto": context,
+        "contexto": contexto,
+        "course_title": course_title,   
+        "instructor_request": instructor_request,
+        "lesson_title": lesson_title,
+
+        
+
     })
 
     return response_stream
